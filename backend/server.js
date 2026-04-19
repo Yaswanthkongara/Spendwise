@@ -29,11 +29,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-// Routes
+// Routes (with /api prefix)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/budget', require('./routes/budget'));
 app.use('/api/users', require('./routes/users'));
+
+// Routes (without /api prefix - fallback for misconfigured frontends)
+app.use('/auth', require('./routes/auth'));
+app.use('/expenses', require('./routes/expenses'));
+app.use('/budget', require('./routes/budget'));
+app.use('/users', require('./routes/users'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'SpendWise API running' }));
