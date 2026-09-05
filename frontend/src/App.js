@@ -12,10 +12,41 @@ import Settings from './pages/Settings';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const [showBypass, setShowBypass] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowBypass(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleClearSession = () => {
+    localStorage.removeItem('sw_token');
+    localStorage.removeItem('sw_user');
+    window.location.href = '/login';
+  };
+
   if (loading) return (
     <div className="loading-screen">
       <div className="spinner" />
       <div className="loading-text">Loading SpendWise...</div>
+      {showBypass && (
+        <button 
+          onClick={handleClearSession}
+          style={{
+            marginTop: '1rem',
+            padding: '8px 16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            color: '#94a3b8',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            transition: 'all 0.2s'
+          }}
+        >
+          Taking too long? Return to Login
+        </button>
+      )}
     </div>
   );
   return user ? children : <Navigate to="/login" replace />;

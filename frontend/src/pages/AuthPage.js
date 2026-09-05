@@ -35,6 +35,22 @@ export default function AuthPage() {
     } finally { setLoading(false); }
   };
 
+  const handleDemoLogin = async () => {
+    setTab('login');
+    const demoEmail = 'demo@university.edu';
+    const demoPass = 'demo123';
+    setLoginForm({ email: demoEmail, password: demoPass });
+    setLoading(true);
+    try {
+      await login(demoEmail, demoPass);
+      toast.success('Signed in with Demo account! 🎉');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Demo login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -89,11 +105,7 @@ export default function AuthPage() {
         )}
 
         <div className="auth-divider">or</div>
-        <button className="btn btn-ghost btn-block" onClick={() => {
-          setTab('login');
-          setLoginForm({ email: 'demo@university.edu', password: 'demo123' });
-          toast('Demo credentials filled in — click Sign in!', { icon: '⚡' });
-        }}>
+        <button className="btn btn-ghost btn-block" onClick={handleDemoLogin} disabled={loading}>
           ⚡ Use demo credentials
         </button>
 

@@ -1,16 +1,14 @@
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' 
-    ? 'https://spendwise-y484.onrender.com/api' 
-    : '/api'),
+  baseURL: 'https://spendwise-y484.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
 });
 
 // Attach JWT token to every request
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('sw_token');
+API.interceptors.request.use(async (config) => {
+  const token = await SecureStore.getItemAsync('sw_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -18,13 +16,11 @@ API.interceptors.request.use((config) => {
 // Handle 401 globally
 API.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('sw_token');
-      localStorage.removeItem('sw_user');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      await SecureStore.deleteItemAsync('sw_token');
+      await SecureStore.deleteItemAsync('sw_user');
+      // Navigation handling will be done in the AuthContext/Navigation layer
     }
     return Promise.reject(err);
   }

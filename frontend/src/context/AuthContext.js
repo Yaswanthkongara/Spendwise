@@ -11,11 +11,16 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('sw_token');
     if (!token) { setLoading(false); return; }
     try {
-      const res = await authAPI.me();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth request timed out')), 7000)
+      );
+      const res = await Promise.race([authAPI.me(), timeoutPromise]);
       setUser(res.data.user);
-    } catch {
+    } catch (err) {
+      console.warn('Auth check failed or timed out:', err);
       localStorage.removeItem('sw_token');
       localStorage.removeItem('sw_user');
+      setUser(null);
     } finally {
       setLoading(false);
     }

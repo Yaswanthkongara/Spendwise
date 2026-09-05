@@ -73,7 +73,31 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      const user = await User.findOne({ email }).select('+password');
+      let user = await User.findOne({ email }).select('+password');
+      
+      // Auto-provision demo user if it doesn't exist yet
+      if (!user && email.toLowerCase() === 'demo@university.edu') {
+        const newUser = await User.create({ name: 'Demo Student', email: 'demo@university.edu', password: 'demo123' });
+        await Budget.create({
+          user: newUser._id,
+          monthlyBudget: 15000,
+          categoryBudgets: {
+            Food: 4000, Transport: 2000, Health: 1500, Study: 2500,
+            Entertainment: 1500, Shopping: 2000, Utilities: 1000, Other: 500,
+          },
+        });
+        const Expense = require('../models/Expense');
+        await Expense.insertMany([
+          { user: newUser._id, amount: 450, category: 'Food', notes: 'Campus Canteen Lunch', date: new Date() },
+          { user: newUser._id, amount: 1200, category: 'Study', notes: 'Algorithms & Data Structures Book', date: new Date(Date.now() - 86400000) },
+          { user: newUser._id, amount: 350, category: 'Transport', notes: 'Weekly Bus Pass', date: new Date(Date.now() - 172800000) },
+          { user: newUser._id, amount: 650, category: 'Entertainment', notes: 'Weekend Movie Night', date: new Date(Date.now() - 259200000) },
+          { user: newUser._id, amount: 1500, category: 'Shopping', notes: 'College Backpack', date: new Date(Date.now() - 345600000) },
+          { user: newUser._id, amount: 800, category: 'Health', notes: 'Pharmacy & Vitamins', date: new Date(Date.now() - 432000000) }
+        ]);
+        user = await User.findOne({ email }).select('+password');
+      }
+
       if (!user || !(await user.comparePassword(password))) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
