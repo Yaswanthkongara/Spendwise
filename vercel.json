@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "installCommand": "cd frontend && npm install",
-  "buildCommand": "cd frontend && CI=false npm run build",
-  "outputDirectory": "frontend/build",
+  "installCommand": "if [ -d frontend ]; then cd frontend; fi && npm install",
+  "buildCommand": "if [ -d frontend ]; then cd frontend; fi && CI=false npm run build",
   "framework": "create-react-app",
   "rewrites": [
     {
